@@ -2,6 +2,8 @@
 
 SJ QR Code 生成器是一個前端工具網站，協助團隊快速輸入 `NAME`、`SJ_API_KEY` 與 `SJ_SEC_KEY` 後，產出對應的 JSON 字串與 QR code，方便在不同裝置間安全地交換認證資訊。
 
+> ⚠️ 部署網址：<https://sinotrade.github.io/sj-qrcode/> — 請確認使用此頁面操作，以確保資訊顯示與部署環境一致。
+
 ## ✨ 特色
 - **即時生成**：送出表單後立即取得格式化 JSON 與 QR code。
 - **輸入驗證**：使用 Zod + React Hook Form 確保欄位符合要求並提供即時提示。

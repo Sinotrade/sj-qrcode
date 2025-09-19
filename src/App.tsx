@@ -166,7 +166,16 @@ function App() {
                 <ShieldCheck className="h-5 w-5" />
                 <AlertTitle>安全提醒</AlertTitle>
                 <AlertDescription>
-                  請確認網址已在安全環境操作，避免將 API Key 透露給未授權的第三方。
+                  請確認目前網址為
+                  <a
+                    href="https://sinotrade.github.io/sj-qrcode/"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="mx-1 underline underline-offset-4"
+                  >
+                    sinotrade.github.io/sj-qrcode/
+                  </a>
+                  並在安全環境操作，避免將 API Key 透露給未授權的第三方。
                 </AlertDescription>
               </Alert>
 
