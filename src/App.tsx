@@ -11,6 +11,7 @@ import {
   Download,
   RefreshCcw,
   ShieldCheck,
+  FileDown,
 } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
@@ -129,11 +130,31 @@ function App() {
 
     const link = document.createElement('a')
     const timestamp = new Date().toISOString().replaceAll(/[:.]/g, '-').slice(0, 19)
+    const normalizedName = (form.getValues('name') || 'anon').trim() || 'anon'
     link.href = qrCodeDataUrl
-    link.download = `sj-config-${timestamp}.png`
+    link.download = `sj-token-${normalizedName}-${timestamp}.png`
     link.click()
 
     toast.success('QR code 已開始下載')
+  }
+
+  const handleDownloadJson = () => {
+    if (!jsonPayload) {
+      toast.error('尚未生成 JSON 資料')
+      return
+    }
+
+    const normalizedName = (form.getValues('name') || 'anon').trim() || 'anon'
+    const timestamp = new Date().toISOString().replaceAll(/[:.]/g, '-').slice(0, 19)
+    const blob = new Blob([jsonPayload], { type: 'application/json;charset=utf-8' })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = `sj-token-${normalizedName}-${timestamp}.json`
+    link.click()
+    URL.revokeObjectURL(url)
+
+    toast.success('JSON 檔案已開始下載')
   }
 
   const handleReset = () => {
@@ -305,24 +326,32 @@ function App() {
                 />
               </div>
             </CardContent>
-            <CardFooter className="flex flex-wrap gap-3">
-              <Button
-                type="button"
-                variant="secondary"
-                disabled={!jsonPayload}
-                onClick={handleCopyJson}
-              >
-                <Copy className="mr-2 h-4 w-4" />複製 JSON
-              </Button>
-              <Button
-                type="button"
-                variant="secondary"
-                disabled={!qrCodeDataUrl}
-                onClick={handleDownloadQr}
-              >
-                <Download className="mr-2 h-4 w-4" />下載 QR code
-              </Button>
-            </CardFooter>
+              <CardFooter className="flex flex-wrap gap-3">
+                <Button
+                  type="button"
+                  variant="secondary"
+                  disabled={!jsonPayload}
+                  onClick={handleCopyJson}
+                >
+                  <Copy className="mr-2 h-4 w-4" />複製 JSON
+                </Button>
+                <Button
+                  type="button"
+                  variant="secondary"
+                  disabled={!qrCodeDataUrl}
+                  onClick={handleDownloadQr}
+                >
+                  <Download className="mr-2 h-4 w-4" />下載 QR code
+                </Button>
+                <Button
+                  type="button"
+                  variant="secondary"
+                  disabled={!jsonPayload}
+                  onClick={handleDownloadJson}
+                >
+                  <FileDown className="mr-2 h-4 w-4" />下載 JSON
+                </Button>
+              </CardFooter>
           </Card>
         </section>
       </main>
