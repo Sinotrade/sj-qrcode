@@ -36,6 +36,7 @@ import { Input } from '@/components/ui/input'
 import { Separator } from '@/components/ui/separator'
 import { Textarea } from '@/components/ui/textarea'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
+import { ThemeToggle } from '@/components/theme-toggle'
 
 const formSchema = z.object({
   name: z
@@ -267,13 +268,16 @@ function App() {
     <div className="min-h-screen bg-background">
       <Toaster richColors closeButton position="top-right" />
       <main className="mx-auto flex w-full max-w-5xl flex-1 flex-col gap-8 px-4 pb-16 pt-10">
-        <header className="text-center">
-          <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">
-            SHIOAJI QR Code 生成器
-          </h1>
-          <p className="mt-3 text-base text-muted-foreground">
-            輸入名稱與 SHIOAJI API 認證資訊，快速生成帶有 JSON 資料的 QR code。
-          </p>
+        <header className="flex flex-col gap-4 text-center sm:flex-row sm:items-start sm:justify-between sm:text-left">
+          <div className="space-y-3">
+            <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">
+              SHIOAJI QR Code 生成器
+            </h1>
+            <p className="text-base text-muted-foreground">
+              輸入名稱與 SHIOAJI API 認證資訊，快速生成帶有 JSON 資料的 QR code。
+            </p>
+          </div>
+          <ThemeToggle />
         </header>
 
         <section className="grid gap-6 lg:grid-cols-[1.05fr_0.95fr]">
