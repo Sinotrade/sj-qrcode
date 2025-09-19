@@ -299,7 +299,9 @@ function App() {
                   value={jsonPayload}
                   readOnly
                   placeholder="完成表單後會自動生成 JSON 資料"
-                  className="min-h-[260px] font-mono text-sm lg:h-full lg:min-h-0"
+                  wrap="off"
+                  spellCheck={false}
+                  className="min-h-[260px] resize-y overflow-auto font-mono text-sm leading-relaxed lg:h-full lg:min-h-0"
                 />
               </div>
             </CardContent>
