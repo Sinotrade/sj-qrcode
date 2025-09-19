@@ -63,6 +63,81 @@ type Payload = {
   SJ_SEC_KEY: string
 }
 
+const formatFileNameSegment = (input: string) => {
+  const trimmed = input.trim()
+  if (!trimmed) return 'anon'
+  const normalized = trimmed.replace(/\s+/g, '-').replace(/[^a-zA-Z0-9-_]/g, '')
+  return normalized || 'anon'
+}
+
+const createLabeledQr = async (text: string, displayName: string) => {
+  const qrSize = 320
+  const qrCanvas = document.createElement('canvas')
+
+  await new Promise<void>((resolve, reject) => {
+    QRCode.toCanvas(
+      qrCanvas,
+      text,
+      {
+        errorCorrectionLevel: 'M',
+        width: qrSize,
+        margin: 1,
+        color: {
+          dark: '#030712',
+          light: '#ffffff',
+        },
+      },
+      (error) => {
+        if (error) {
+          reject(error)
+          return
+        }
+        resolve()
+      },
+    )
+  })
+
+  const padding = 28
+  const headerLines = 2
+  const lineHeight = 22
+  const headerHeight = padding + headerLines * lineHeight
+  const footerPadding = 30
+  const canvas = document.createElement('canvas')
+  canvas.width = qrSize + padding * 2
+  canvas.height = headerHeight + qrSize + footerPadding
+
+  const ctx = canvas.getContext('2d')
+  if (!ctx) {
+    throw new Error('無法建立畫布內容')
+  }
+
+  ctx.fillStyle = '#ffffff'
+  ctx.fillRect(0, 0, canvas.width, canvas.height)
+
+  ctx.fillStyle = '#0f172a'
+  ctx.textAlign = 'center'
+  ctx.textBaseline = 'top'
+
+  ctx.font = '600 20px "Inter", "Noto Sans", "Helvetica Neue", Arial, sans-serif'
+  ctx.fillText('SHIOAJI API TOKEN', canvas.width / 2, padding - 6)
+
+  ctx.font = '400 16px "Inter", "Noto Sans", "Helvetica Neue", Arial, sans-serif'
+  ctx.fillText(`NAME: ${displayName || '未命名'}`, canvas.width / 2, padding - 6 + lineHeight)
+
+  const qrY = headerHeight - 12
+  ctx.drawImage(qrCanvas, padding, qrY, qrSize, qrSize)
+
+  ctx.strokeStyle = '#e5e7eb'
+  ctx.lineWidth = 1
+  ctx.strokeRect(padding - 1, qrY - 1, qrSize + 2, qrSize + 2)
+
+  ctx.font = '400 12px "Inter", "Noto Sans", "Helvetica Neue", Arial, sans-serif'
+  ctx.fillStyle = '#6b7280'
+  ctx.fillText('https://sinotrade.github.io/sj-qrcode/', canvas.width / 2, canvas.height - footerPadding + 6)
+
+  return canvas.toDataURL('image/png')
+}
+
 function App() {
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -88,18 +163,13 @@ function App() {
     const formatted = JSON.stringify(payload, null, 2)
 
     try {
-      const dataUrl = await QRCode.toDataURL(formatted, {
-        errorCorrectionLevel: 'M',
-        width: 320,
-        margin: 1,
-        color: {
-          dark: '#030712',
-          light: '#ffffff',
-        },
-      })
+      const labeledQr = await createLabeledQr(
+        formatted,
+        values.name.trim() || '未命名',
+      )
 
       setJsonPayload(formatted)
-      setQrCodeDataUrl(dataUrl)
+      setQrCodeDataUrl(labeledQr)
       toast.success('QR code 已完成')
     } catch (error) {
       console.error('Failed to generate QR code', error)
@@ -130,7 +200,7 @@ function App() {
 
     const link = document.createElement('a')
     const timestamp = new Date().toISOString().replaceAll(/[:.]/g, '-').slice(0, 19)
-    const normalizedName = (form.getValues('name') || 'anon').trim() || 'anon'
+    const normalizedName = formatFileNameSegment(form.getValues('name') ?? '')
     link.href = qrCodeDataUrl
     link.download = `sj-token-${normalizedName}-${timestamp}.png`
     link.click()
@@ -144,7 +214,7 @@ function App() {
       return
     }
 
-    const normalizedName = (form.getValues('name') || 'anon').trim() || 'anon'
+    const normalizedName = formatFileNameSegment(form.getValues('name') ?? '')
     const timestamp = new Date().toISOString().replaceAll(/[:.]/g, '-').slice(0, 19)
     const blob = new Blob([jsonPayload], { type: 'application/json;charset=utf-8' })
     const url = URL.createObjectURL(blob)
@@ -289,8 +359,8 @@ function App() {
               <CardTitle>QR code 與 JSON 結果</CardTitle>
               <CardDescription>生成後可直接掃描 QR code 並複製 JSON 字串。</CardDescription>
             </CardHeader>
-            <CardContent className="flex flex-col gap-5 lg:h-[620px]">
-              <div className="flex flex-col gap-2 lg:flex-[1.6]">
+            <CardContent className="flex flex-col gap-4 lg:h-[600px]">
+              <div className="flex flex-col gap-2 lg:flex-[1.5]">
                 <Separator className="mb-1 lg:mb-1.5" />
                 {hasResult ? (
                   <div className="flex flex-col items-center gap-3">
@@ -314,7 +384,7 @@ function App() {
 
               <Separator />
 
-              <div className="flex flex-col gap-4 lg:flex-[1.4]">
+              <div className="flex flex-col gap-3 lg:flex-[1.3]">
                 <p className="text-sm font-medium text-muted-foreground">JSON 資料</p>
                 <Textarea
                   value={jsonPayload}
@@ -322,36 +392,36 @@ function App() {
                   placeholder="完成表單後會自動生成 JSON 資料"
                   wrap="off"
                   spellCheck={false}
-                  className="min-h-[260px] resize-y overflow-auto font-mono text-sm leading-relaxed lg:h-full lg:min-h-0"
+                  className="min-h-[220px] resize-y overflow-auto font-mono text-sm leading-relaxed lg:h-full lg:min-h-0"
                 />
               </div>
             </CardContent>
-              <CardFooter className="flex flex-wrap gap-3">
-                <Button
-                  type="button"
-                  variant="secondary"
-                  disabled={!jsonPayload}
-                  onClick={handleCopyJson}
-                >
-                  <Copy className="mr-2 h-4 w-4" />複製 JSON
-                </Button>
-                <Button
-                  type="button"
-                  variant="secondary"
-                  disabled={!qrCodeDataUrl}
-                  onClick={handleDownloadQr}
-                >
-                  <Download className="mr-2 h-4 w-4" />下載 QR code
-                </Button>
-                <Button
-                  type="button"
-                  variant="secondary"
-                  disabled={!jsonPayload}
-                  onClick={handleDownloadJson}
-                >
-                  <FileDown className="mr-2 h-4 w-4" />下載 JSON
-                </Button>
-              </CardFooter>
+            <CardFooter className="flex gap-3 overflow-x-auto pb-4 pt-0 flex-nowrap">
+              <Button
+                type="button"
+                variant="secondary"
+                disabled={!jsonPayload}
+                onClick={handleCopyJson}
+              >
+                <Copy className="mr-2 h-4 w-4" />複製 JSON
+              </Button>
+              <Button
+                type="button"
+                variant="secondary"
+                disabled={!jsonPayload}
+                onClick={handleDownloadJson}
+              >
+                <FileDown className="mr-2 h-4 w-4" />下載 JSON
+              </Button>
+              <Button
+                type="button"
+                variant="secondary"
+                disabled={!qrCodeDataUrl}
+                onClick={handleDownloadQr}
+              >
+                <Download className="mr-2 h-4 w-4" />下載 QR code
+              </Button>
+            </CardFooter>
           </Card>
         </section>
       </main>
