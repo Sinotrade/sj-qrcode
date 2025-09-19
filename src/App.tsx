@@ -259,15 +259,15 @@ function App() {
               <CardTitle>QR code 與 JSON 結果</CardTitle>
               <CardDescription>生成後可直接掃描 QR code 並複製 JSON 字串。</CardDescription>
             </CardHeader>
-            <CardContent className="flex flex-col gap-6 lg:h-[560px]">
-              <div className="flex flex-col gap-4 lg:flex-[2]">
-                <Separator className="mb-2 lg:mb-4" />
+            <CardContent className="flex flex-col gap-5 lg:h-[620px]">
+              <div className="flex flex-col gap-2 lg:flex-[1.6]">
+                <Separator className="mb-1 lg:mb-1.5" />
                 {hasResult ? (
-                  <div className="flex flex-col items-center gap-4">
+                  <div className="flex flex-col items-center gap-3">
                     <img
                       src={qrCodeDataUrl}
                       alt="SJ QR code"
-                      className="h-auto w-52 rounded border bg-white p-3 shadow"
+                      className="h-auto w-60 rounded border bg-white p-2 shadow"
                     />
                     <p className="text-center text-xs text-muted-foreground">
                       如果顯示模糊，請再試一次或提高螢幕亮度後掃描。
@@ -284,13 +284,13 @@ function App() {
 
               <Separator />
 
-              <div className="flex flex-col gap-4 lg:flex-[1]">
+              <div className="flex flex-col gap-4 lg:flex-[1.4]">
                 <p className="text-sm font-medium text-muted-foreground">JSON 資料</p>
                 <Textarea
                   value={jsonPayload}
                   readOnly
                   placeholder="完成表單後會自動生成 JSON 資料"
-                  className="min-h-[160px] font-mono text-sm lg:h-full lg:min-h-0"
+                  className="min-h-[260px] font-mono text-sm lg:h-full lg:min-h-0"
                 />
               </div>
             </CardContent>
